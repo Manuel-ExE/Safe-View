@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b1220">
+  <title>SafeView</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="logo">S</div>
+      <div>
+        <h1>SafeView</h1>
+        <p class="tag">Private media protection</p>
+      </div>
+      <span class="pill">Android</span>
+    </header>
+
+    <section class="card">
+      <h2>Protected browser</h2>
+      <p>Open sites with local filtering. Explicit and revealing images are blurred on-device. Nothing is uploaded.</p>
+      <button id="btnPinterest" class="primary">Open Pinterest</button>
+      <button id="btnGoogle" class="secondary">Open Google Images</button>
+      <button id="btnCustom" class="secondary">Open any URL…</button>
+    </section>
+
+    <section class="card">
+      <h2>Filter settings</h2>
+      <label class="row">
+        <span>Protection enabled</span>
+        <input type="checkbox" id="enabled" checked>
+      </label>
+      <label class="row">
+        <span>Strict revealing filter</span>
+        <input type="checkbox" id="strict" checked>
+      </label>
+      <label class="row">
+        <span>Click to reveal</span>
+        <input type="checkbox" id="reveal">
+      </label>
+      <label class="row">
+        <span>AI visual classifier (native Android only)</span>
+        <input type="checkbox" id="aiEnabled" disabled>
+      </label>
+      <p class="hint">This standalone web surface uses heuristics only. The optional native Android model is unavailable here.</p>
+    </section>
+
+    <section class="card muted">
+      <h2>How it works on Android</h2>
+      <ul>
+        <li>All classification stays on your device.</li>
+        <li>The protected browser injects the filter into pages you open inside the app.</li>
+        <li>System-wide filtering (other apps) requires extra Android permissions and is not enabled in this version.</li>
+      </ul>
+    </section>
+
+    <footer>
+      SafeView Android · v1.2.3 · Local only
+    </footer>
+  </div>
+
+  <!-- Hidden browser surface -->
+  <div id="browser" class="browser" hidden>
+    <div class="browser-bar">
+      <button id="btnBack" aria-label="Back">←</button>
+      <input id="urlBar" type="url" placeholder="https://">
+      <button id="btnGo">Go</button>
+      <button id="btnClose" aria-label="Close">✕</button>
+    </div>
+    <iframe id="frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" allow="fullscreen"></iframe>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

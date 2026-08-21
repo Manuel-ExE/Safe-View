@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SafeView</string>
+    <string name="settings">Settings</string>
+    <string name="protection_enabled">Protection enabled</string>
+    <string name="strict_mode">Strict revealing filter</string>
+    <string name="click_to_reveal">Click to reveal</string>
+    <string name="ai_classifier">AI visual classifier</string>
+    <string name="ai_classifier_summary">On-device TensorFlow Lite when model is installed</string>
+    <string name="display_mode">Blocked media style</string>
+    <string name="display_blur">Blur</string>
+    <string name="display_placeholder">Placeholder</string>
+    <string name="explicit_threshold">Explicit threshold</string>
+    <string name="revealing_threshold">Revealing threshold</string>
+    <string name="privacy_note">All classification runs on your device. No images are uploaded to third-party servers.</string>
+    <string name="ai_status_ready">AI model ready — visual classifier available</string>
+    <string name="ai_status_missing">AI model not installed — heuristics only. Add nsfw_mobilenet_v2.tflite to assets.</string>
+    <string name="ai_status_pipeline_off">AI pipeline disabled</string>
+    <string name="back">Back</string>
+    <string name="home">Home</string>
+    <string name="go">Go</string>
+    <string name="url_hint">Search or enter URL</string>
+</resources>

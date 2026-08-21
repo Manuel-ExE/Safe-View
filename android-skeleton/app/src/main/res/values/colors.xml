@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sv_bg">#0B1220</color>
+    <color name="sv_card">#111B2C</color>
+    <color name="sv_line">#24334A</color>
+    <color name="sv_text">#F3F7FF</color>
+    <color name="sv_muted">#9EACC2</color>
+    <color name="sv_accent">#6EA8FF</color>
+    <color name="sv_accent_dark">#4D8EF5</color>
+    <color name="sv_ok">#6FD39A</color>
+    <color name="sv_toolbar">#111B2C</color>
+    <color name="sv_input">#0D1728</color>
+    <color name="ic_launcher_background">#27549D</color>
+</resources>

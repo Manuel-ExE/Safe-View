@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Shield -->
+    <path android:fillColor="#6EA8FF"
+        android:pathData="M54,22 L30,32 v20 c0,16.5 11.5,32 24,36 12.5,-4 24,-19.5 24,-36 V32 L54,22z"/>
+    <!-- Check -->
+    <path android:fillColor="#F3F7FF"
+        android:pathData="M44,55 l-7,-7 3,-3 4,4 12,-12 3,3z"/>
+    <!-- S letter hint -->
+    <path android:fillColor="#27549D"
+        android:pathData="M54,22 L30,32 v6 L54,28 L78,38 v-6z"/>
+</vector>

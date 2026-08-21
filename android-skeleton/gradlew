@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "ERROR: This is not a functional Gradle wrapper."
+echo "See GENERATE_WRAPPER.md — open the project in Android Studio or run:"
+echo "  gradle wrapper --gradle-version 8.2"
+exit 1

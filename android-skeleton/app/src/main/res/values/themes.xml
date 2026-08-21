@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SafeView" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/sv_accent</item>
+        <item name="colorPrimaryDark">@color/sv_accent_dark</item>
+        <item name="colorAccent">@color/sv_accent</item>
+        <item name="android:statusBarColor">@color/sv_bg</item>
+        <item name="android:navigationBarColor">@color/sv_bg</item>
+        <item name="android:windowBackground">@color/sv_bg</item>
+        <item name="android:colorBackground">@color/sv_bg</item>
+        <item name="colorSurface">@color/sv_card</item>
+        <item name="colorOnSurface">@color/sv_text</item>
+        <item name="android:textColorPrimary">@color/sv_text</item>
+        <item name="android:textColorSecondary">@color/sv_muted</item>
+    </style>
+</resources>

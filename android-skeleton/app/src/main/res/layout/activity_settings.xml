@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/sv_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="32dp">
+
+        <!-- Top bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="8dp"
+            android:background="@color/sv_toolbar">
+
+            <ImageButton
+                android:id="@+id/btnBackSettings"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/settings"
+                android:textColor="@color/sv_text"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingStart="8dp" />
+        </LinearLayout>
+
+        <!-- Protection card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardBackgroundColor="@color/sv_card"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/sv_line"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Protection"
+                    android:textColor="@color/sv_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:paddingBottom="8dp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchEnabled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/protection_enabled"
+                    android:textColor="@color/sv_text" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchStrict"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/strict_mode"
+                    android:textColor="@color/sv_text" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchReveal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/click_to_reveal"
+                    android:textColor="@color/sv_text" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- AI card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@color/sv_card"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/sv_line"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="AI classifier"
+                    android:textColor="@color/sv_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:paddingBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/aiStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ai_status_missing"
+                    android:textColor="@color/sv_muted"
+                    android:textSize="12sp"
+                    android:paddingBottom="12dp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchAi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ai_classifier"
+                    android:textColor="@color/sv_text" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Explicit threshold"
+                    android:textColor="@color/sv_muted"
+                    android:textSize="13sp"
+                    android:paddingTop="12dp" />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderExplicit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0.10"
+                    android:valueTo="0.90"
+                    android:stepSize="0.05"
+                    android:value="0.40"
+                    app:labelBehavior="withinBounds" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Revealing threshold"
+                    android:textColor="@color/sv_muted"
+                    android:textSize="13sp" />
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderRevealing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0.05"
+                    android:valueTo="0.50"
+                    android:stepSize="0.01"
+                    android:value="0.12"
+                    app:labelBehavior="withinBounds" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Display card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@color/sv_card"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/sv_line"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/display_mode"
+                    android:textColor="@color/sv_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:paddingBottom="8dp" />
+
+                <RadioGroup
+                    android:id="@+id/radioDisplay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/radioBlur"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/display_blur"
+                        android:textColor="@color/sv_text"
+                        android:checked="true" />
+
+                    <RadioButton
+                        android:id="@+id/radioPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/display_placeholder"
+                        android:textColor="@color/sv_text" />
+                </RadioGroup>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:text="@string/privacy_note"
+            android:textColor="@color/sv_muted"
+            android:textSize="12sp"
+            android:gravity="center" />
+    </LinearLayout>
+</ScrollView>
