@@ -1,0 +1,18 @@
+{
+  "appId": "com.safeview.app",
+  "appName": "SafeView",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0b1220"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0b1220"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "safeview-android",
+  "version": "1.2.3",
+  "description": "SafeView \u2014 private local media filter for Android",
+  "scripts": {
+    "start": "npx serve www -p 3333",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "android": "npx cap run android"
+  },
+  "keywords": [
+    "safeview",
+    "nsfw",
+    "filter",
+    "android",
+    "privacy"
+  ],
+  "author": "SafeView",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/status-bar": "^6.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}
