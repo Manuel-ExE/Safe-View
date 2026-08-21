@@ -1,36 +1,46 @@
-# SafeView APK — Start Here
+# SafeView v1.4.4 — Start Here
 
-## What this is
+Open the `android-skeleton` folder in **Android Studio** and build the debug APK with **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
 
-This folder is the SafeView Android project. It is not the APK itself. Android Studio turns this project into an APK.
+A full Gradle wrapper JAR is **not** shipped. Android Studio will download the distribution and generate the wrapper on first open. See `android-skeleton/GENERATE_WRAPPER.md` if you need a command-line wrapper.
 
-## The only build steps
+After installing the APK:
 
-1. Install **Android Studio** from https://developer.android.com/studio.
-2. Unzip this package.
-3. Open the folder named **android-skeleton** in Android Studio.
-4. Wait for Android Studio to finish loading and syncing the project.
-5. In the top menu, click **Build**.
-6. Click **Build Bundle(s) / APK(s)**.
-7. Click **Build APK(s)**.
-8. Android Studio will show a message with a link named **locate**. Click it to find the APK.
+1. Open SafeView.
+2. Open **Settings**.
+3. Turn on **Background protection** and approve Android's VPN permission dialog.
+4. Keep the SafeView protection notification visible while protection is active.
+5. Tap the Background protection status text to edit the **blocked domain list**.
+6. If the TFLite model is installed, turn on **Screen AI protection**.
+7. Read the privacy notice and approve screen capture.
+8. If Android asks, allow SafeView to display over other apps.
+9. Approve Android's screen-capture dialog.
+10. Open **Protected apps** to choose whether Screen AI monitors everything or only selected apps.
 
-The APK is normally located at:
+## Screen AI notes
 
-```text
-android-skeleton/app/build/outputs/apk/debug/app-debug.apk
-```
+Screen AI uses Android MediaProjection to sample visible screen frames and run the existing TFLite classifier locally. Frames are not saved or uploaded. A foreground notification remains visible while capture is active. SafeView can show a neutral cover when multiple sampled frames exceed the configured classifier threshold. In Settings, **Calm warning mode** shows a supportive message and a **Go to safety** button; turn it off for strict blocking. If Android stops capture, SafeView removes the cover, marks Screen AI as paused, and sends a parent notification.
 
-You can copy that `.apk` file to an Android phone and install it.
+In Settings, choose **Protected apps**. The default is **Protect all apps**. Turn that off and select specific packages to limit analysis. Applying selected-app rules requires Android Usage Access; if that permission is not granted, SafeView keeps the safer all-app analysis behavior. SafeView uses package activity only to apply the rule and does not read messages, contacts, URLs, or app content.
 
-## Important
+Screen AI is not a guarantee that every nude, explicit, or revealing image or video frame will be blocked. Protected windows may not be capturable, brief frames may be missed, and Android or another app may stop the capture session. The background VPN blocks configured adult domains but does not inspect image pixels. For strongest image filtering, use the SafeView browser.
 
-The optional visual AI model is not included. The app can still build and run using its heuristic filter. To enable visual AI, add this file before building:
+## Model
 
-```text
-android-skeleton/app/src/main/assets/nsfw_mobilenet_v2.tflite
-```
+The optional TFLite model is not included. Add `nsfw_mobilenet_v2.tflite` to `android-skeleton/app/src/main/assets/` before building if you want visual classification. Without it, Screen AI stays unavailable and the browser uses heuristics only.
 
-The archive does not include the Gradle wrapper JAR. If Android Studio asks to generate or download Gradle files, allow it to do so. If Android Studio shows an error, use **File → Sync Project with Gradle Files**.
+## What's new in 1.4.4
 
-For a public release, use **Build → Generate Signed Bundle / APK → APK** instead of the ordinary debug APK. Keep the signing key safe.
+- Foreground-app lookups are cached to reduce repeated Usage Access work.
+- Screen AI samples directly into a 224×224 bitmap to reduce memory pressure.
+- Blocked-domain entries are validated as hostnames and empty-list saves require confirmation.
+
+## Earlier 1.4.3 changes
+
+- More reliable foreground-app detection for protected-app rules.
+- Screen AI respects live threshold settings.
+- Lower memory use on Screen AI (720 px capture + early downsample).
+- Clearer Protected-apps UI with an explicit "Protect all apps" switch.
+- Editable blocked-domain list for the background VPN.
+
+See `CHANGELOG-1.4.3.md` for earlier details. The v1.4.4 audit fixes are summarized in the project README.

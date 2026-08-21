@@ -1,6 +1,6 @@
 {
   "name": "safeview-android",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "description": "SafeView \u2014 private local media filter for Android",
   "scripts": {
     "start": "npx serve www -p 3333",
