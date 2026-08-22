@@ -65,6 +65,15 @@
                     android:textStyle="bold"
                     android:paddingBottom="8dp" />
 
+                <TextView
+                    android:id="@+id/setupStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Setup status"
+                    android:textColor="@color/sv_muted"
+                    android:textSize="12sp"
+                    android:paddingBottom="12dp" />
+
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchEnabled"
                     android:layout_width="match_parent"

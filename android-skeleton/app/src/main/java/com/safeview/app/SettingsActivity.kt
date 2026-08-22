@@ -24,6 +24,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var backgroundStatus: TextView
     private lateinit var screenAiSwitch: MaterialSwitch
     private lateinit var screenAiStatus: TextView
+    private lateinit var setupStatus: TextView
     private var waitingForOverlayPermission = false
 
     private val backgroundPrefs by lazy {
@@ -53,6 +54,8 @@ class SettingsActivity : AppCompatActivity() {
         backgroundStatus = findViewById(R.id.backgroundStatus)
         screenAiSwitch = findViewById(R.id.switchScreenAi)
         screenAiStatus = findViewById(R.id.screenAiStatus)
+        setupStatus = findViewById(R.id.setupStatus)
+        setupStatus.setOnClickListener { runNextSetupStep() }
         val appRulesButton = findViewById<TextView>(R.id.appRulesButton)
         val appRulesSummary = findViewById<TextView>(R.id.appRulesSummary)
         val sliderExplicit = findViewById<Slider>(R.id.sliderExplicit)
@@ -94,6 +97,7 @@ class SettingsActivity : AppCompatActivity() {
             captureState != SafeViewScreenAiService.STATE_PAUSED
         updateScreenAiStatus(modelReady && prefs.screenAiEnabled, captureState)
         updateAppRulesSummary(appRulesSummary)
+        updateSetupStatus(modelReady)
         if (!modelReady) {
             // The submitted build does not bundle a model; do not present AI as active.
             prefs.aiEnabled = false
@@ -252,6 +256,10 @@ class SettingsActivity : AppCompatActivity() {
         screenAiSwitch.isChecked = enabled && state != SafeViewScreenAiService.STATE_PAUSED
         updateScreenAiStatus(enabled, state)
         findViewById<TextView?>(R.id.appRulesSummary)?.let { updateAppRulesSummary(it) }
+        val modelReady = (application as? SafeViewApp)?.let {
+            it.aiPipelineAvailable && it.classifier.isReady
+        } == true
+        updateSetupStatus(modelReady)
     }
 
     private fun updateAppRulesSummary(view: TextView) {
@@ -261,6 +269,49 @@ class SettingsActivity : AppCompatActivity() {
         } else {
             getString(R.string.app_rules_selected, count)
         }
+    }
+
+    private fun runNextSetupStep() {
+        val vpnActive = getSharedPreferences("safeview_vpn_status", MODE_PRIVATE)
+            .getBoolean(SafeViewVpnService.KEY_ACTIVE, false)
+        if (VpnService.prepare(this) != null || !vpnActive) {
+            requestBackgroundProtection()
+            return
+        }
+        val modelReady = (application as? SafeViewApp)?.let {
+            it.aiPipelineAvailable && it.classifier.isReady
+        } == true
+        if (modelReady && !Settings.canDrawOverlays(this)) {
+            requestScreenAi()
+            return
+        }
+        if (modelReady && !prefs.screenAiEnabled) {
+            requestScreenAi()
+            return
+        }
+        startActivity(Intent(this, AppRulesActivity::class.java))
+    }
+
+    private fun updateSetupStatus(modelReady: Boolean) {
+        if (!::setupStatus.isInitialized) return
+        val vpnConsentReady = VpnService.prepare(this) == null
+        val vpnActive = getSharedPreferences("safeview_vpn_status", MODE_PRIVATE)
+            .getBoolean(SafeViewVpnService.KEY_ACTIVE, false)
+        val vpnReady = vpnConsentReady && vpnActive
+        val overlayReady = Settings.canDrawOverlays(this)
+        val captureState = screenAiStatePrefs.getString(
+            SafeViewScreenAiService.CAPTURE_STATE_KEY,
+            SafeViewScreenAiService.STATE_STOPPED
+        ) ?: SafeViewScreenAiService.STATE_STOPPED
+        val captureReady = captureState == SafeViewScreenAiService.STATE_ACTIVE
+        val appSelection = if (prefs.protectedApps.isEmpty()) "all apps" else "${prefs.protectedApps.size} selected apps"
+        setupStatus.text = "Strict mode: ${if (prefs.strict) "ON" else "OFF"}\n" +
+            "VPN filter: ${if (vpnReady) "active" else if (vpnConsentReady) "not running" else "permission required"}\n" +
+            "AI model: ${if (modelReady) "ready" else "missing"}\n" +
+            "Screen capture: ${if (captureReady) "running" else "not running"}\n" +
+            "Overlay access: ${if (overlayReady) "granted" else "required"}\n" +
+            "Protected apps: $appSelection"
+        setupStatus.setTextColor(getColor(if (vpnReady && modelReady && overlayReady) R.color.sv_ok else R.color.sv_muted))
     }
 
     private fun updateBackgroundStatus() {

@@ -1,0 +1,12 @@
+SafeView local model attribution
+
+File: nsfw_mobilenet_v2.tflite
+Source: https://github.com/nipunru/nsfw-detector-android
+Source asset: nsfwdetector/src/main/assets/automl/NSFW.tflite
+Labels: nonnude, nude
+Input: 1 x 224 x 224 x 3 UINT8
+Output: 1 x 2 UINT8 scores
+
+The source repository is published under the MIT License. This notice is included
+for attribution. Verify the source repository and license before commercial
+redistribution or publication through an app store.

@@ -219,7 +219,18 @@ class SafeViewScreenAiService : Service() {
             revealingThreshold = prefs.revealingThreshold
         )
         bitmap.recycle()
-        if (result == null) return
+        if (result == null) {
+            // Strict mode must fail closed. A classifier error or unavailable model
+            // must never be treated as a safe frame.
+            if (prefs.strict) {
+                consecutiveBlocked = BLOCK_CONFIRMATION_FRAMES
+                showOverlay()
+            } else {
+                consecutiveBlocked = 0
+                hideOverlay()
+            }
+            return
+        }
         if (result.blocked) consecutiveBlocked++ else consecutiveBlocked = 0
         if (consecutiveBlocked >= BLOCK_CONFIRMATION_FRAMES) showOverlay()
         else if (consecutiveBlocked == 0) hideOverlay()

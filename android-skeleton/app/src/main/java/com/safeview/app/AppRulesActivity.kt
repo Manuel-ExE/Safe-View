@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.materialswitch.MaterialSwitch
 
@@ -150,6 +151,17 @@ class AppRulesActivity : AppCompatActivity() {
     }
 
     private fun saveAndFinish() {
+        if (!protectAllSwitch.isChecked && !hasUsageAccess()) {
+            AlertDialog.Builder(this)
+                .setTitle("Usage Access required")
+                .setMessage("To protect only selected apps, SafeView must know which app is currently in the foreground. Android grants this separately from normal app permissions. Grant Usage Access, then return here and save again.")
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton("Open Settings") { _, _ ->
+                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                }
+                .show()
+            return
+        }
         if (protectAllSwitch.isChecked) {
             // Empty set = protect all (documented safer default)
             prefs.protectedApps = emptySet()

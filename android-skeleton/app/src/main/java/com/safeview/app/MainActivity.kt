@@ -3,6 +3,7 @@ package com.safeview.app
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.webkit.WebChromeClient
@@ -26,6 +27,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bridge: SafeViewBridge
     private var contentScript: String = ""
     private var bridgeAttached: Boolean = false
+    private var showingBlockPage: Boolean = false
+
+    private val strictSearchTerms = setOf(
+        "porn", "porno", "pornhub", "xvideos", "xnxx", "sex video", "sexual video",
+        "nude sex", "naked sex", "hentai", "xxx", "explicit sex"
+    )
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +101,10 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                if (!showingBlockPage && url != null && shouldBlockUrl(url)) {
+                    showBlockedPage()
+                    return
+                }
                 bridge.onPageStarted(url)
                 // Detach bridge until we know the finished origin is allowed
                 detachBridge()
@@ -112,6 +123,10 @@ class MainActivity : AppCompatActivity() {
                 request: WebResourceRequest?
             ): Boolean {
                 val uri = request?.url ?: return true
+                if (shouldBlockUrl(uri.toString())) {
+                    showBlockedPage()
+                    return true
+                }
                 return when (uri.scheme?.lowercase()) {
                     "https" -> false
                     else -> true
@@ -155,7 +170,43 @@ class MainActivity : AppCompatActivity() {
                     java.net.URLEncoder.encode(url, "UTF-8")
             }
         }
-        webView.loadUrl(url)
+        if (shouldBlockUrl(url)) {
+            showBlockedPage()
+        } else {
+            webView.loadUrl(url)
+        }
+    }
+
+    private fun shouldBlockUrl(rawUrl: String): Boolean {
+        if (!prefs.enabled) return false
+        val uri = try { Uri.parse(rawUrl) } catch (_: Exception) { return true }
+        if (uri.scheme?.lowercase() != "https") return true
+        val host = uri.host?.lowercase()?.removePrefix("www.") ?: return true
+        val blockedDomain = prefs.blockedDomains.any { domain ->
+            val normalized = domain.lowercase().removePrefix("www.")
+            host == normalized || host.endsWith(".$normalized")
+        }
+        if (blockedDomain) return true
+        if (prefs.strict) {
+            val text = listOfNotNull(uri.path, uri.query, uri.fragment).joinToString(" ").lowercase()
+            if (strictSearchTerms.any { text.contains(it) }) return true
+        }
+        return false
+    }
+
+    private fun showBlockedPage() {
+        showingBlockPage = true
+        webView.stopLoading()
+        webView.loadDataWithBaseURL(
+            "https://safeview.local/",
+            "<html><meta name='viewport' content='width=device-width'><body style='background:#101827;color:#fff;font-family:sans-serif;padding:32px'><h1>Content blocked by SafeView</h1><p>This page was blocked because Strict protection is enabled.</p><p>No page media was loaded.</p></body></html>",
+            "text/html",
+            "UTF-8",
+            null
+        )
+        urlBar.setText("")
+        showingBlockPage = false
+        updateStatusChip()
     }
 
     private fun injectSafeView() {

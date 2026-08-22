@@ -39,7 +39,18 @@ class SafeViewVpnService : VpnService() {
             .addAddress("10.77.0.2", 32)
             .addDnsServer(DNS_VPN)
             .addRoute(DNS_VPN, 32)
-        vpnInterface = builder.establish() ?: return
+        vpnInterface = builder.establish() ?: run {
+            getSharedPreferences(STATUS_PREFS, MODE_PRIVATE).edit()
+                .putBoolean(KEY_ACTIVE, false)
+                .putString(KEY_ERROR, "Android did not establish the VPN tunnel")
+                .apply()
+            return
+        }
+        getSharedPreferences(STATUS_PREFS, MODE_PRIVATE).edit()
+            .putBoolean(KEY_ACTIVE, true)
+            .putString(KEY_ERROR, "")
+            .putLong(KEY_BLOCKED_COUNT, 0L)
+            .apply()
         running = true
         executor.execute { loop() }
     }
@@ -73,7 +84,13 @@ class SafeViewVpnService : VpnService() {
         if (dnsLength <= 12 || dnsLength > MAX_DNS_PACKET) return
         val dns = packet.copyOfRange(dnsOffset, length)
         val domain = parseQuestionName(dns) ?: return
-        val responseDns = if (isBlocked(domain)) blockedResponse(dns) else forwardDns(dns)
+        val blocked = isBlocked(domain)
+        if (blocked) {
+            getSharedPreferences(STATUS_PREFS, MODE_PRIVATE).edit()
+                .putLong(KEY_BLOCKED_COUNT, blockedCount() + 1L)
+                .apply()
+        }
+        val responseDns = if (blocked) blockedResponse(dns) else forwardDns(dns)
         if (responseDns == null) return
         val response = buildIpv4UdpResponse(packet, ihl, sourcePort, destinationPort, responseDns)
         output.write(response)
@@ -191,12 +208,22 @@ class SafeViewVpnService : VpnService() {
         ((bytes[index].toInt() and 0xff) shl 8) or (bytes[index + 1].toInt() and 0xff)
 
     override fun onRevoke() {
+        getSharedPreferences(STATUS_PREFS, MODE_PRIVATE).edit()
+            .putBoolean(KEY_ACTIVE, false)
+            .putString(KEY_ERROR, "VPN permission was revoked")
+            .apply()
         stopSelf()
         super.onRevoke()
     }
 
+    private fun blockedCount(): Long = getSharedPreferences(STATUS_PREFS, MODE_PRIVATE)
+        .getLong(KEY_BLOCKED_COUNT, 0L)
+
     override fun onDestroy() {
         running = false
+        getSharedPreferences(STATUS_PREFS, MODE_PRIVATE).edit()
+            .putBoolean(KEY_ACTIVE, false)
+            .apply()
         try { vpnInterface?.close() } catch (_: Exception) {}
         vpnInterface = null
         executor.shutdownNow()
@@ -233,5 +260,9 @@ class SafeViewVpnService : VpnService() {
         private const val UPSTREAM_DNS = "1.1.1.1"
         private const val MAX_DNS_PACKET = 4096
         private const val NOTIFICATION_ID = 7101
+        private const val STATUS_PREFS = "safeview_vpn_status"
+        const val KEY_ACTIVE = "active"
+        const val KEY_ERROR = "error"
+        const val KEY_BLOCKED_COUNT = "blocked_count"
     }
 }

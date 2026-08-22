@@ -5,6 +5,9 @@ plugins {
 
 android {
     namespace 'com.safeview.app'
+    androidResources {
+        noCompress 'tflite'
+    }
     compileSdk 34
 
     defaultConfig {

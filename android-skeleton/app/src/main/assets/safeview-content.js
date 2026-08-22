@@ -195,7 +195,10 @@
 
     const src = target.currentSrc || target.src || target.poster || "";
     const dataUrl = tryCaptureDataUrl(target);
-    if (!dataUrl && !(src && src.indexOf("https://") === 0)) return;
+    if (!dataUrl && !(src && src.indexOf("https://") === 0)) {
+      if (settings.strict) block(target);
+      return;
+    }
 
     prunePending();
     const id = uuid();
@@ -216,6 +219,7 @@
     } catch (_) {
       pendingById.delete(id);
       aiChecked.delete(target);
+      if (settings.strict) block(target);
     }
   }
 
@@ -249,6 +253,7 @@
       block(entry.el);
     } else if (result.error) {
       aiChecked.delete(entry.el);
+      if (settings.strict) block(entry.el);
     }
   };
 
