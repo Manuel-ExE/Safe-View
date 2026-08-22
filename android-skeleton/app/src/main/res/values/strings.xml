@@ -51,6 +51,7 @@
     <string name="blocked_domains_empty_message">Saving an empty list disables configured DNS-domain blocking. The SafeView browser and other protections are unchanged. Continue?</string>
     <string name="blocked_domains_save_empty">Disable domain blocking</string>
     <string name="screen_ai_status_permission">Screen capture and overlay permissions are required.</string>
+    <string name="screen_ai_status_starting">Starting screen capture…</string>
     <string name="screen_ai_consent_title">Screen AI privacy notice</string>
     <string name="screen_ai_consent_message">SafeView will capture the visible screen while this feature is on and analyze small frames on this device for nude, explicit, or revealing content. Frames are not saved or uploaded. Android shows a persistent notification, and protected windows may not be capturable. Continue?</string>
     <string name="screen_ai_overlay_permission">Allow SafeView to display a blocking cover over other apps.</string>

@@ -35,12 +35,11 @@ This mode does not decrypt HTTPS traffic or inspect raw pixels from other applic
 
 ## Build
 
-Open `android-skeleton` in **Android Studio** (recommended).  
-A full Gradle wrapper JAR is **not** shipped — see `GENERATE_WRAPPER.md`.
+Open `android-skeleton` in **Android Studio**, or run `./gradlew assembleDebug` from that directory. A complete Gradle wrapper, including `gradle-wrapper.jar`, is included. The GitHub Actions workflow also builds with Gradle 8.2.
 
 ## Enable visual AI
 
-Place `nsfw_mobilenet_v2.tflite` in `app/src/main/assets/` and rebuild.
+The release package includes `nsfw_mobilenet_v2.tflite` in `app/src/main/assets/`. Rebuild after changing the model.
 
 ## License
 MIT

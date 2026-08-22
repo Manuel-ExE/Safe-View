@@ -193,14 +193,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun showHomePage() {
         showingBlockPage = true
-        webView.loadDataWithBaseURL(
-            HOME_URL,
-            "<html><meta name='viewport' content='width=device-width'><body style='background:#101827;color:#fff;font-family:sans-serif;padding:28px'><h1>SafeView</h1><p>Protected browsing with local filtering.</p><h2>Search safely</h2><p>Use the address bar to search or enter an HTTPS website.</p><p>Strict protection is enabled.</p></body></html>",
-            "text/html", "UTF-8", null
-        )
+        webView.loadDataWithBaseURL(HOME_URL, homePageHtml(), "text/html", "UTF-8", null)
         urlBar.setText("")
         showingBlockPage = false
     }
+
+    private fun homePageHtml(): String = """
+        <html>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <style>$SHARED_PAGE_STYLE
+            .shield { margin: 0 auto 18px; }
+            .actions { margin-top: 22px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+            .pill { display: inline-block; padding: 6px 14px; border-radius: 999px;
+                background: #0F1A2B; border: 1px solid #24334A; color: #93A2BA; font-size: 13px; }
+        </style>
+        <body>
+            <div class="card">
+                $SHIELD_SVG
+                <h1>SafeView</h1>
+                <p class="lead">Protected browsing with local, on-device filtering.</p>
+                <p class="hint">Use the address bar above to search or enter a website.</p>
+                <div class="actions"><span class="pill">Protection is active</span></div>
+            </div>
+        </body>
+        </html>
+    """.trimIndent()
 
     private fun showBrowserMenu(anchor: ImageButton) {
         val menu = android.widget.PopupMenu(this, anchor)
@@ -281,16 +298,66 @@ class MainActivity : AppCompatActivity() {
     private fun showBlockedPage() {
         showingBlockPage = true
         webView.stopLoading()
-        webView.loadDataWithBaseURL(
-            "https://safeview.local/",
-            "<html><meta name='viewport' content='width=device-width'><body style='background:#101827;color:#fff;font-family:sans-serif;padding:32px'><h1>Content blocked by SafeView</h1><p>This page was blocked because Strict protection is enabled.</p><p>No page media was loaded.</p></body></html>",
-            "text/html",
-            "UTF-8",
-            null
-        )
+        webView.loadDataWithBaseURL("https://safeview.local/", blockedPageHtml(), "text/html", "UTF-8", null)
         urlBar.setText("")
         showingBlockPage = false
         updateStatusChip()
+    }
+
+    private fun blockedPageHtml(): String = """
+        <html>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <style>$SHARED_PAGE_STYLE
+            .shield circle, .shield path { fill: #F5C168; }
+        </style>
+        <body>
+            <div class="card">
+                $BLOCK_SVG
+                <h1>Content blocked</h1>
+                <p class="lead">This page was blocked by SafeView's protection settings.</p>
+                <p class="hint">No page media was loaded.</p>
+            </div>
+        </body>
+        </html>
+    """.trimIndent()
+
+    companion object {
+        /** Shared inline CSS for SafeView's own in-app pages (home, blocked). */
+        private const val SHARED_PAGE_STYLE = """
+            :root { color-scheme: dark; }
+            * { box-sizing: border-box; }
+            body {
+                margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+                background: #0B1220; color: #F3F7FF;
+                font-family: -apple-system, Roboto, 'Segoe UI', sans-serif;
+                padding: 28px;
+            }
+            .card {
+                max-width: 360px; width: 100%; text-align: center;
+                background: #111B2C; border: 1px solid #24334A; border-radius: 20px;
+                padding: 32px 24px;
+            }
+            .shield { width: 56px; height: 56px; }
+            h1 { font-size: 20px; margin: 4px 0 10px; }
+            p { margin: 0 0 6px; line-height: 1.4; }
+            .lead { font-size: 14px; color: #F3F7FF; }
+            .hint { font-size: 13px; color: #93A2BA; }
+        """
+
+        private const val SHIELD_SVG = """
+            <svg class="shield" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#6EA8FF" d="M12,1L3,5v6c0,5.55 3.84,10.74 9,12 5.16,-1.26 9,-6.45 9,-12V5l-9,-4z"/>
+                <path fill="#F3F7FF" d="M10.3,14.9l-2.8,-2.8 1.05,-1.05 1.75,1.75 4.05,-4.05 1.05,1.05z"/>
+            </svg>
+        """
+
+        private const val BLOCK_SVG = """
+            <svg class="shield" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#F5C168" d="M12,1L3,5v6c0,5.55 3.84,10.74 9,12 5.16,-1.26 9,-6.45 9,-12V5l-9,-4z"/>
+                <rect x="11" y="7" width="2" height="7" rx="1" fill="#111B2C"/>
+                <rect x="11" y="15.5" width="2" height="2" rx="1" fill="#111B2C"/>
+            </svg>
+        """
     }
 
     private fun injectSafeView() {

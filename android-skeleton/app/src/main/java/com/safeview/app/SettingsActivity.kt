@@ -94,7 +94,8 @@ class SettingsActivity : AppCompatActivity() {
             SafeViewScreenAiService.STATE_STOPPED
         ) ?: SafeViewScreenAiService.STATE_STOPPED
         screenAiSwitch.isChecked = modelReady && prefs.screenAiEnabled &&
-            captureState != SafeViewScreenAiService.STATE_PAUSED
+            (captureState == SafeViewScreenAiService.STATE_ACTIVE ||
+                captureState == SafeViewScreenAiService.STATE_STARTING)
         updateScreenAiStatus(modelReady && prefs.screenAiEnabled, captureState)
         updateAppRulesSummary(appRulesSummary)
         updateSetupStatus(modelReady)
@@ -217,7 +218,7 @@ class SettingsActivity : AppCompatActivity() {
                 .putExtra(SafeViewScreenAiService.EXTRA_RESULT_DATA, data)
         )
         screenAiSwitch.isChecked = true
-        updateScreenAiStatus(true)
+        updateScreenAiStatus(true, SafeViewScreenAiService.STATE_STARTING)
     }
 
     private fun stopScreenAi() {
@@ -230,7 +231,8 @@ class SettingsActivity : AppCompatActivity() {
         if (!::screenAiStatus.isInitialized) return
         screenAiStatus.text = when {
             active && state == SafeViewScreenAiService.STATE_PAUSED -> getString(R.string.screen_ai_status_paused)
-            active -> getString(R.string.screen_ai_status_on)
+            active && state == SafeViewScreenAiService.STATE_STARTING -> getString(R.string.screen_ai_status_starting)
+            active && state == SafeViewScreenAiService.STATE_ACTIVE -> getString(R.string.screen_ai_status_on)
             else -> getString(R.string.screen_ai_status_off)
         }
     }
@@ -253,7 +255,7 @@ class SettingsActivity : AppCompatActivity() {
             SafeViewScreenAiService.STATE_STOPPED
         ) ?: SafeViewScreenAiService.STATE_STOPPED
         val enabled = modelReady && prefs.screenAiEnabled
-        screenAiSwitch.isChecked = enabled && state != SafeViewScreenAiService.STATE_PAUSED
+        screenAiSwitch.isChecked = enabled && (state == SafeViewScreenAiService.STATE_ACTIVE || state == SafeViewScreenAiService.STATE_STARTING)
         updateScreenAiStatus(enabled, state)
         findViewById<TextView?>(R.id.appRulesSummary)?.let { updateAppRulesSummary(it) }
         updateSetupStatus(modelReady)

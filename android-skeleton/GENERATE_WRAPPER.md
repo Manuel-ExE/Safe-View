@@ -1,26 +1,24 @@
 # Gradle wrapper
 
-This archive ships **only** `gradle/wrapper/gradle-wrapper.properties`.
+This archive includes a complete Gradle wrapper: `gradlew`, `gradle/wrapper/gradle-wrapper.jar`, and `gradle-wrapper.properties`. The wrapper uses Gradle 8.2 and downloads the distribution automatically when needed.
 
-It does **not** include a working `gradle-wrapper.jar` or a functional `gradlew` binary.
-The `gradlew` script in this tree is an instructional stub and will exit with an error
-if run. Do not treat it as a reproducible CLI build entry point until the full wrapper
-is generated.
+## Command-line build
 
-## Generate a real wrapper
+From the `android-skeleton` directory:
 
-### Android Studio (recommended)
-1. File → Open → `android-skeleton`
-2. Trust / sync the project
-3. Studio will download dependencies and can create wrapper files as needed
-
-### Command line (machine with Gradle installed)
 ```bash
-cd android-skeleton
-gradle wrapper --gradle-version 8.2
 chmod +x gradlew
 ./gradlew clean lint assembleDebug
 ```
 
-Commit `gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`, and the properties file
-together before CI use.
+The debug APK is written to:
+
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Android Studio build
+
+Open `android-skeleton` in Android Studio, allow the project to sync, and choose **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
+
+The GitHub Actions workflow uses Gradle 8.2 directly and builds `assembleDebug` from this directory.

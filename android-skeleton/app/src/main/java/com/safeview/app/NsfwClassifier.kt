@@ -173,7 +173,7 @@ class NsfwClassifier(private val context: Context) {
             when (type) {
                 DataType.FLOAT32 -> buffer.float
                 DataType.UINT8 -> ((buffer.get().toInt() and 0xff) - outputZeroPoint) * outputScale
-                DataType.INT8 -> buffer.get().toInt() * outputScale
+                DataType.INT8 -> (buffer.get().toInt() - outputZeroPoint) * outputScale
                 DataType.INT32 -> buffer.int.toFloat()
                 else -> throw IllegalArgumentException("Unsupported output type: $type")
             }
