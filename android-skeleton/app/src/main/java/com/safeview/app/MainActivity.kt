@@ -1,6 +1,7 @@
 package com.safeview.app
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -14,9 +15,12 @@ import android.webkit.WebViewClient
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.io.BufferedReader
 import java.io.InputStreamReader
+
+private const val HOME_URL = "https://safeview.local/home"
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +32,8 @@ class MainActivity : AppCompatActivity() {
     private var contentScript: String = ""
     private var bridgeAttached: Boolean = false
     private var showingBlockPage: Boolean = false
+    private val tabUrls = mutableListOf<String>()
+    private val browserPrefs by lazy { getSharedPreferences("safeview_browser", MODE_PRIVATE) }
 
     private val strictSearchTerms = setOf(
         "porn", "porno", "pornhub", "xvideos", "xnxx", "sex video", "sexual video",
@@ -50,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
         val btnHome = findViewById<ImageButton>(R.id.btnHome)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
+        val btnMenu = findViewById<ImageButton>(R.id.btnMenu)
+        val btnTabs = findViewById<TextView>(R.id.btnTabs)
 
         setupWebView()
         updateStatusChip()
@@ -58,12 +66,12 @@ class MainActivity : AppCompatActivity() {
         btnBack.setOnClickListener {
             if (webView.canGoBack()) webView.goBack()
         }
-        btnHome.setOnClickListener {
-            webView.loadUrl("https://www.pinterest.com/")
-        }
+        btnHome.setOnClickListener { showHomePage() }
         btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        btnMenu.setOnClickListener { showBrowserMenu(btnMenu) }
+        btnTabs.setOnClickListener { showTabsDialog(btnTabs) }
         urlBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
                 navigateToBar()
@@ -71,7 +79,9 @@ class MainActivity : AppCompatActivity() {
             } else false
         }
 
-        webView.loadUrl("https://www.pinterest.com/")
+        tabUrls += HOME_URL
+        updateTabCount(btnTabs)
+        showHomePage()
     }
 
     override fun onResume() {
@@ -114,6 +124,10 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 syncBridgeForUrl(url)
+                if (!showingBlockPage && url != null && url.startsWith("https://")) {
+                    recordHistory(url)
+                    if (tabUrls.isNotEmpty()) tabUrls[tabUrls.lastIndex] = url
+                }
                 injectSafeView()
                 updateStatusChip()
             }
@@ -175,6 +189,76 @@ class MainActivity : AppCompatActivity() {
         } else {
             webView.loadUrl(url)
         }
+    }
+
+    private fun showHomePage() {
+        showingBlockPage = true
+        webView.loadDataWithBaseURL(
+            HOME_URL,
+            "<html><meta name='viewport' content='width=device-width'><body style='background:#101827;color:#fff;font-family:sans-serif;padding:28px'><h1>SafeView</h1><p>Protected browsing with local filtering.</p><h2>Search safely</h2><p>Use the address bar to search or enter an HTTPS website.</p><p>Strict protection is enabled.</p></body></html>",
+            "text/html", "UTF-8", null
+        )
+        urlBar.setText("")
+        showingBlockPage = false
+    }
+
+    private fun showBrowserMenu(anchor: ImageButton) {
+        val menu = android.widget.PopupMenu(this, anchor)
+        menu.menu.add("Reload")
+        menu.menu.add("Browsing history")
+        menu.menu.add("Downloads")
+        menu.menu.add("Add bookmark")
+        menu.menu.add("Bookmarks")
+        menu.setOnMenuItemClickListener { item ->
+            when (item.title.toString()) {
+                "Reload" -> webView.reload()
+                "Browsing history" -> showHistoryDialog()
+                "Downloads" -> startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
+                "Add bookmark" -> addBookmark()
+                "Bookmarks" -> showBookmarksDialog()
+            }
+            true
+        }
+        menu.show()
+    }
+
+    private fun showTabsDialog(tabButton: TextView) {
+        val labels = tabUrls.mapIndexed { index, url -> "Tab ${index + 1}: ${url.ifBlank { "SafeView home" }}" }
+        AlertDialog.Builder(this).setTitle("Tabs (${tabUrls.size})")
+            .setItems(labels.toTypedArray()) { _, which -> if (which in tabUrls.indices) webView.loadUrl(tabUrls[which]) }
+            .setPositiveButton("New tab") { _, _ -> tabUrls += HOME_URL; updateTabCount(tabButton); showHomePage() }
+            .setNegativeButton("Close", null).show()
+    }
+
+    private fun updateTabCount(view: TextView) { view.text = tabUrls.size.toString() }
+
+    private fun recordHistory(url: String) {
+        val history = browserPrefs.getStringSet("history", emptySet()).orEmpty().toMutableList()
+        history.remove(url)
+        history.add(0, url)
+        browserPrefs.edit().putStringSet("history", history.take(50).toSet()).apply()
+    }
+
+    private fun showHistoryDialog() {
+        val history = browserPrefs.getStringSet("history", emptySet()).orEmpty().toList()
+        AlertDialog.Builder(this).setTitle("Browsing history")
+            .setItems(if (history.isEmpty()) arrayOf("No history yet") else history.toTypedArray()) { _, which -> if (which < history.size) webView.loadUrl(history[which]) }
+            .setNegativeButton("Close", null).show()
+    }
+
+    private fun addBookmark() {
+        webView.url?.takeIf { it.startsWith("https://") }?.let { url ->
+            val bookmarks = browserPrefs.getStringSet("bookmarks", emptySet()).orEmpty().toMutableSet()
+            bookmarks.add(url)
+            browserPrefs.edit().putStringSet("bookmarks", bookmarks).apply()
+        }
+    }
+
+    private fun showBookmarksDialog() {
+        val bookmarks = browserPrefs.getStringSet("bookmarks", emptySet()).orEmpty().toList()
+        AlertDialog.Builder(this).setTitle("Bookmarks")
+            .setItems(if (bookmarks.isEmpty()) arrayOf("No bookmarks yet") else bookmarks.toTypedArray()) { _, which -> if (which < bookmarks.size) webView.loadUrl(bookmarks[which]) }
+            .setNegativeButton("Close", null).show()
     }
 
     private fun shouldBlockUrl(rawUrl: String): Boolean {
