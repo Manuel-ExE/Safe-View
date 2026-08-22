@@ -263,10 +263,10 @@ class SafeViewScreenAiService : Service() {
                 }
             }
             result.setPixels(pixels, 0, outW, 0, 0, outW, outH)
-            result
+            return result
         } catch (_: Exception) {
             result.recycle()
-            null
+            return null
         }
     }
 

@@ -70,7 +70,7 @@ class BlockedDomainsActivity : AppCompatActivity() {
                     value.isNotEmpty() && !isValidHostname(value)
                 }
                 if (invalidCount > 0) {
-                    AlertDialog.Builder(this)
+                    AlertDialog.Builder(this@BlockedDomainsActivity)
                         .setTitle(R.string.blocked_domains_invalid_title)
                         .setMessage(getString(R.string.blocked_domains_invalid_message, invalidCount))
                         .setPositiveButton(android.R.string.ok, null)
@@ -78,7 +78,7 @@ class BlockedDomainsActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
                 if (domains.isEmpty()) {
-                    AlertDialog.Builder(this)
+                    AlertDialog.Builder(this@BlockedDomainsActivity)
                         .setTitle(R.string.blocked_domains_empty_title)
                         .setMessage(R.string.blocked_domains_empty_message)
                         .setNegativeButton(android.R.string.cancel, null)
