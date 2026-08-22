@@ -256,9 +256,6 @@ class SettingsActivity : AppCompatActivity() {
         screenAiSwitch.isChecked = enabled && state != SafeViewScreenAiService.STATE_PAUSED
         updateScreenAiStatus(enabled, state)
         findViewById<TextView?>(R.id.appRulesSummary)?.let { updateAppRulesSummary(it) }
-        val modelReady = (application as? SafeViewApp)?.let {
-            it.aiPipelineAvailable && it.classifier.isReady
-        } == true
         updateSetupStatus(modelReady)
     }
 
