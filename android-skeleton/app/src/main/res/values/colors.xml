@@ -10,5 +10,7 @@
     <color name="sv_ok">#6FD39A</color>
     <color name="sv_toolbar">#111B2C</color>
     <color name="sv_input">#0D1728</color>
+    <color name="sv_avatar_bg">#24334A</color>
+    <color name="sv_pill_bg">#1A2940</color>
     <color name="ic_launcher_background">#27549D</color>
 </resources>
