@@ -25,7 +25,9 @@ class NsfwClassifier(private val context: Context) {
         val blocked: Boolean,
         val explicitScore: Float,
         val revealingScore: Float,
-        val labels: Map<String, Float> = emptyMap()
+        val labels: Map<String, Float> = emptyMap(),
+        val category: ContentCategory = ContentCategory.UNCERTAIN,
+        val confidence: Float = 0f
     )
 
     @Volatile private var interpreter: Interpreter? = null
@@ -109,7 +111,9 @@ class NsfwClassifier(private val context: Context) {
                     blocked = nude >= explicitThreshold,
                     explicitScore = nude,
                     revealingScore = 0f,
-                    labels = labels
+                    labels = labels,
+                    category = if (nude >= explicitThreshold) ContentCategory.EXPLICIT else ContentCategory.SAFE,
+                    confidence = max(nonnude, nude)
                 )
             } else {
                 val labels = LABELS.mapIndexed { i, name -> name to scores.getOrElse(i) { 0f } }.toMap()
@@ -121,7 +125,13 @@ class NsfwClassifier(private val context: Context) {
                     blocked = explicit >= explicitThreshold || sexy >= revealingThreshold,
                     explicitScore = explicit,
                     revealingScore = sexy,
-                    labels = labels
+                    labels = labels,
+                    category = when {
+                        explicit >= explicitThreshold -> ContentCategory.EXPLICIT
+                        sexy >= revealingThreshold -> ContentCategory.REVEALING
+                        else -> ContentCategory.SAFE
+                    },
+                    confidence = max(explicit, sexy)
                 )
             }
         } catch (e: Exception) {

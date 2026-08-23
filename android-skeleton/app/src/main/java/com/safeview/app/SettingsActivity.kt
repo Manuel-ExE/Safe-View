@@ -25,6 +25,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var screenAiSwitch: MaterialSwitch
     private lateinit var screenAiStatus: TextView
     private lateinit var setupStatus: TextView
+    private lateinit var dashboardStats: TextView
     private var waitingForOverlayPermission = false
 
     private val backgroundPrefs by lazy {
@@ -55,6 +56,7 @@ class SettingsActivity : AppCompatActivity() {
         screenAiSwitch = findViewById(R.id.switchScreenAi)
         screenAiStatus = findViewById(R.id.screenAiStatus)
         setupStatus = findViewById(R.id.setupStatus)
+        dashboardStats = findViewById(R.id.dashboardStats)
         setupStatus.setOnClickListener { runNextSetupStep() }
         val appRulesButton = findViewById<TextView>(R.id.appRulesButton)
         val appRulesSummary = findViewById<TextView>(R.id.appRulesSummary)
@@ -311,6 +313,8 @@ class SettingsActivity : AppCompatActivity() {
             "Overlay access: ${if (overlayReady) "granted" else "required"}\n" +
             "Protected apps: $appSelection"
         setupStatus.setTextColor(getColor(if (vpnReady && modelReady && overlayReady) R.color.sv_ok else R.color.sv_muted))
+        val counts = SafeViewMediaDatabase(this).counts()
+        dashboardStats.text = "${counts["media"] ?: 0} media scanned · ${counts["events"] ?: 0} events · ${counts["blocked"] ?: 0} blocked"
     }
 
     private fun updateBackgroundStatus() {

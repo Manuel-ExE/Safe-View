@@ -19,5 +19,7 @@ class SafeViewApp : Application() {
         Thread {
             classifier.load()
         }.start()
+        // WorkManager will exit safely until the user grants both media permissions.
+        SafeViewMediaScanScheduler.schedule(this)
     }
 }

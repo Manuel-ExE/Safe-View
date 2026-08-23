@@ -1,0 +1,21 @@
+SafeView Android final clean package manifest
+
+This archive is the authoritative clean package.
+
+Top-level required files:
+- PRIVACY.md
+- README.md
+- START_HERE.md
+- .github/workflows/android.yml
+
+Android build files:
+- android-skeleton/gradlew
+- android-skeleton/gradle/wrapper/gradle-wrapper.jar
+- android-skeleton/gradle/wrapper/gradle-wrapper.properties
+- android-skeleton/app/proguard-rules.pro
+
+Local AI files:
+- android-skeleton/app/src/main/assets/nsfw_mobilenet_v2.tflite
+- android-skeleton/app/src/main/assets/MODEL_ATTRIBUTION.txt
+
+No nested .zip files are included.

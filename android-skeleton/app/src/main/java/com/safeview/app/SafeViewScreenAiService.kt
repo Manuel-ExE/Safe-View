@@ -10,8 +10,8 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Matrix
-import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
 import android.media.Image
 import android.media.ImageReader
@@ -24,12 +24,10 @@ import android.os.IBinder
 import android.provider.Settings
 import android.app.AppOpsManager
 import android.util.DisplayMetrics
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
@@ -54,6 +52,7 @@ class SafeViewScreenAiService : Service() {
     private var cachedForegroundPackage: String? = null
     private var foregroundCheckedAt = 0L
     private var lossAlertSent = false
+    private var lastEventAt = 0L
 
     private val statePrefs by lazy {
         getSharedPreferences("safeview_screen_ai", Context.MODE_PRIVATE)
@@ -70,7 +69,11 @@ class SafeViewScreenAiService : Service() {
                 return@OnImageAvailableListener
             }
             lastSampleMs = now
-            val bitmap = imageToBitmap(image) ?: return@OnImageAvailableListener
+            val bitmap = imageToBitmap(image)
+            if (bitmap == null) {
+                if (SettingsPrefs(this).strict) handler?.post { showOverlay() }
+                return@OnImageAvailableListener
+            }
             handler?.post { classifyFrame(bitmap) }
         } finally {
             image.close()
@@ -233,9 +236,39 @@ class SafeViewScreenAiService : Service() {
             }
             return
         }
-        if (result.blocked) consecutiveBlocked++ else consecutiveBlocked = 0
-        if (consecutiveBlocked >= BLOCK_CONFIRMATION_FRAMES) showOverlay()
-        else if (consecutiveBlocked == 0) hideOverlay()
+        val mode = when {
+            prefs.strict -> ProtectionMode.STRICT
+            prefs.screenAiWarningMode -> ProtectionMode.WARNING
+            else -> ProtectionMode.BALANCED
+        }
+        val action = SafeViewPolicyEngine.decide(
+            ClassificationResult(result.category, result.confidence),
+            mode
+        )
+        if (action == PolicyAction.BLOCK) consecutiveBlocked++ else consecutiveBlocked = 0
+        when {
+            action == PolicyAction.WARN -> showOverlay()
+            consecutiveBlocked >= BLOCK_CONFIRMATION_FRAMES -> {
+                showOverlay()
+                recordBlockEvent(result)
+            }
+            consecutiveBlocked == 0 -> hideOverlay()
+        }
+    }
+
+    private fun recordBlockEvent(result: NsfwClassifier.Result) {
+        val now = System.currentTimeMillis()
+        if (now - lastEventAt < EVENT_DEDUPE_MS) return
+        lastEventAt = now
+        val mode = if (SettingsPrefs(this).strict) ProtectionMode.STRICT else ProtectionMode.BALANCED
+        val classification = ClassificationResult(result.category, result.confidence)
+        val action = SafeViewPolicyEngine.decide(classification, mode)
+        SafeViewMediaDatabase(this).addEvent(
+            source = "Screen AI",
+            packageName = cachedForegroundPackage,
+            result = classification,
+            action = action
+        )
     }
 
     /**
@@ -286,76 +319,34 @@ class SafeViewScreenAiService : Service() {
     private fun showOverlay() {
         if (overlay != null || !Settings.canDrawOverlays(this)) return
         val warningMode = SettingsPrefs(this).screenAiWarningMode
-        val bg = getColor(R.color.sv_bg)
-        val cardColor = getColor(R.color.sv_card)
-        val lineColor = getColor(R.color.sv_line)
-        val textColor = getColor(R.color.sv_text)
-        val mutedColor = getColor(R.color.sv_muted)
-        val accentColor = getColor(R.color.sv_accent)
-
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setBackgroundColor(bg)
+            setPadding(48, 48, 48, 48)
+            setBackgroundColor(Color.rgb(20, 24, 32))
         }
-
-        val card = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            background = GradientDrawable().apply {
-                setColor(cardColor)
-                cornerRadius = dp(20)
-                setStroke(dp(1).toInt(), lineColor)
-            }
-            setPadding(dp(28).toInt(), dp(32).toInt(), dp(28).toInt(), dp(28).toInt())
-        }
-
-        val icon = ImageView(this).apply {
-            setImageResource(R.drawable.ic_shield)
-            layoutParams = LinearLayout.LayoutParams(dp(48).toInt(), dp(48).toInt()).apply {
-                bottomMargin = dp(16).toInt()
-            }
-        }
-
         val title = TextView(this).apply {
             text = getString(if (warningMode) R.string.screen_ai_intervention_title else R.string.screen_ai_block_title)
-            setTextColor(textColor)
-            textSize = 19f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(Color.WHITE)
+            textSize = 22f
             gravity = Gravity.CENTER
         }
         val message = TextView(this).apply {
             text = getString(if (warningMode) R.string.screen_ai_intervention_message else R.string.screen_ai_block_message)
-            setTextColor(mutedColor)
-            textSize = 14f
+            setTextColor(Color.LTGRAY)
+            textSize = 16f
             gravity = Gravity.CENTER
-            setPadding(0, dp(8).toInt(), 0, dp(20).toInt())
+            setPadding(0, 24, 0, 24)
         }
-        card.addView(icon)
-        card.addView(title, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        card.addView(message, LinearLayout.LayoutParams(dp(240).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT))
+        root.addView(title, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        root.addView(message, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         if (warningMode) {
             val home = Button(this).apply {
                 text = getString(R.string.screen_ai_go_home)
-                setTextColor(bg)
-                textSize = 14f
-                isAllCaps = false
-                background = GradientDrawable().apply {
-                    setColor(accentColor)
-                    cornerRadius = dp(999)
-                }
-                setPadding(dp(24).toInt(), dp(10).toInt(), dp(24).toInt(), dp(10).toInt())
                 setOnClickListener { goHome() }
             }
-            card.addView(
-                home,
-                LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            )
+            root.addView(home, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
-        root.addView(
-            card,
-            LinearLayout.LayoutParams(dp(300).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT)
-        )
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         } else {
@@ -381,10 +372,6 @@ class SafeViewScreenAiService : Service() {
             overlay = null
         }
     }
-
-    /** Converts a dp value to pixels using this service's display metrics. */
-    private fun dp(value: Int): Float =
-        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), resources.displayMetrics)
 
     private fun goHome() {
         val home = Intent(Intent.ACTION_MAIN).apply {
@@ -426,9 +413,12 @@ class SafeViewScreenAiService : Service() {
     }
 
     override fun onDestroy() {
-        if (statePrefs.getString(KEY_CAPTURE_STATE, STATE_STOPPED) == STATE_ACTIVE) {
+        val previousState = statePrefs.getString(KEY_CAPTURE_STATE, STATE_STOPPED)
+        if (previousState != STATE_STOPPED) {
             setCaptureState(STATE_STOPPED)
-            notifyCaptureLoss(getString(R.string.screen_ai_alert_service_stopped))
+            if (previousState == STATE_ACTIVE || previousState == STATE_STARTING) {
+                notifyCaptureLoss(getString(R.string.screen_ai_alert_service_stopped))
+            }
         }
         hideOverlay()
         display?.release()
@@ -483,6 +473,7 @@ class SafeViewScreenAiService : Service() {
         private const val ALERT_NOTIFICATION_ID = 7302
         const val CAPTURE_STATE_KEY = "capture_state"
         private const val KEY_CAPTURE_STATE = CAPTURE_STATE_KEY
+        private const val EVENT_DEDUPE_MS = 15_000L
         const val STATE_STARTING = "starting"
         const val STATE_ACTIVE = "active"
         const val STATE_PAUSED = "paused"

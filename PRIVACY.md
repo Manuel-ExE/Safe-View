@@ -1,67 +1,33 @@
-# SafeView Privacy Notice
+# SafeView Privacy Statement
 
-This notice describes what SafeView for Android does on the device. It covers
-the three protection features and the data each one touches. SafeView has no
-backend server; nothing described below is transmitted off the device.
+SafeView is designed as a local, user-controlled content-protection tool. Image classification is performed on the device with TensorFlow Lite. Screen frames used by Screen AI are processed in memory and are not intentionally saved, uploaded, or sent to a third-party classification service.
 
-## Background protection (VPN service)
+## Data handled locally
 
-SafeView can run a local `VpnService` that acts as a DNS filter.
+SafeView may process the following data locally on the device:
 
-- It inspects only outgoing DNS queries (UDP port 53) to check the requested
-  domain against the blocked-domain list stored in the app's local settings.
-- It does not decrypt HTTPS traffic and cannot see URLs, page content, or
-  images inside other apps.
-- It counts how many queries were blocked, for display in Settings. That
-  count is stored locally and is not transmitted anywhere.
-- Apps using encrypted DNS, cached content, direct IP connections, or their
-  own networking may not be affected by this filter.
+| Data | Purpose | Remote upload |
+|---|---|---|
+| Visible screen frames | Local Screen AI classification when the user enables MediaProjection | None by SafeView |
+| Browser page metadata and media elements | Browser filtering and local classification | None by SafeView |
+| Blocked-domain preferences | DNS filtering configuration | None by SafeView |
+| Browser history and bookmarks | User-requested browser features | Stored locally by the app |
+| Installed-app package names | Protected-app selection and foreground-app rules | None by SafeView |
 
-## Screen AI protection (optional, parent-consented)
+## Permissions and special access
 
-Screen AI uses Android's `MediaProjection` API to sample visible screen
-frames and classify them on-device with a local TensorFlow Lite model.
+The VPN permission allows SafeView to create a local Android VPN interface for configured DNS-domain filtering. MediaProjection allows Screen AI to receive visible display frames after the user confirms Android’s screen-capture dialog. Display-over-other-apps access allows SafeView to show a blocking cover above another app. Usage Access is used only when the user selects individual protected apps and SafeView needs to identify the foreground package. Notification permission may be required so Android can show the ongoing protection notification.
 
-- Frames are held in memory only for the duration of classification and are
-  discarded immediately after. SafeView does not save, log, or upload
-  captured frames.
-- Classification happens entirely on-device; frames and classification
-  results never leave the device.
-- A foreground notification is shown by Android any time capture is active,
-  and a persistent visual cover may be shown over content pending or
-  following classification.
-- If the parent enables **Protected apps** with specific packages selected,
-  SafeView uses Android Usage Access only to identify which app is currently
-  in the foreground, so it can decide whether to apply Screen AI to it.
-  SafeView does not read messages, contacts, URLs, browsing content, or any
-  other app data through this permission.
-- Screen capture can be turned off at any time from Settings. If Android
-  stops the capture session (for example, because the user revokes
-  permission or switches to a protected system window), SafeView marks the
-  service paused and notifies the parent rather than silently continuing.
+These permissions are controlled by Android and can be revoked by the user at any time. SafeView should show protection as unavailable, paused, or incomplete when a required permission or service is not active.
 
-## SafeView browser
+## Network and filtering limits
 
-- The built-in browser can classify images using the same on-device model,
-  limited to an allowlist of trusted image-hosting origins (for example,
-  Pinterest, Google Images, Bing Images).
-- Images sent to the classifier are processed in memory and are not saved or
-  uploaded.
-- Browsing history, bookmarks, and downloads recorded by the browser are
-  stored locally in the app's private storage and are not transmitted
-  anywhere.
+The background VPN is DNS-only. It does not decrypt HTTPS traffic or inspect arbitrary pixels from other apps. Encrypted DNS, cached content, direct IP connections, app-specific networking, protected windows, and other Android restrictions may bypass domain filtering or prevent screen capture. The SafeView browser provides the strongest in-app media filtering, but no ordinary Android application can guarantee perfect blocking in every third-party app.
 
-## What SafeView does not do
+## Model attribution
 
-- SafeView does not send captured frames, classified images, browsing
-  history, or app-usage data to any server. There is no backend to send it
-  to.
-- SafeView does not guarantee that every explicit image or video frame in
-  every third-party app will be detected or blocked. See `README.md` for
-  the specific limitations of each protection layer.
+The bundled model and its source attribution are documented in `android-skeleton/app/src/main/assets/MODEL_ATTRIBUTION.txt`. The model operates locally and is not a cloud service.
 
-## Model
+## User control
 
-The bundled classifier (`nsfw_mobilenet_v2.tflite`) runs entirely on-device
-using TensorFlow Lite. See `MODEL_ATTRIBUTION.txt` for its source and
-license.
+SafeView does not provide covert monitoring. The user must explicitly enable protection modes and approve Android’s required system dialogs. The user can disable VPN, Screen AI, overlay access, and Usage Access through Android settings or SafeView settings.
