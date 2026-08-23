@@ -338,7 +338,7 @@ class SafeViewBridge(
             if (!isAllowedFetchUrl(url)) return null
             val request = Request.Builder()
                 .url(url)
-                .header("User-Agent", "SafeView/1.2.3")
+                .header("User-Agent", "SafeView/1.5.1")
                 .get()
                 .build()
             val response = http.newCall(request).execute()

@@ -24,12 +24,42 @@ class SafeViewVpnService : VpnService() {
     private val executor = Executors.newSingleThreadExecutor()
     @Volatile private var running = false
 
+    // Cached blocked-domain set, refreshed only when the underlying preference
+    // actually changes (via listener) instead of re-reading SharedPreferences
+    // on every DNS packet, which previously happened on the packet-processing
+    // hot path via `SettingsPrefs(this).blockedDomains`.
+    @Volatile private var blockedDomainsCache: Set<String> = emptySet()
+    private var settingsPrefsListener: android.content.SharedPreferences.OnSharedPreferenceChangeListener? = null
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!running) {
+            refreshBlockedDomainsCache()
+            registerBlockedDomainsListener()
             startForeground(NOTIFICATION_ID, notification())
             establish()
         }
         return START_STICKY
+    }
+
+    private fun refreshBlockedDomainsCache() {
+        blockedDomainsCache = SettingsPrefs(this).blockedDomains
+    }
+
+    private fun registerBlockedDomainsListener() {
+        if (settingsPrefsListener != null) return
+        val settingsPrefs = getSharedPreferences(SettingsPrefs.PREFS_NAME, MODE_PRIVATE)
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == SettingsPrefs.KEY_BLOCKED_DOMAINS) refreshBlockedDomainsCache()
+        }
+        settingsPrefs.registerOnSharedPreferenceChangeListener(listener)
+        settingsPrefsListener = listener
+    }
+
+    private fun unregisterBlockedDomainsListener() {
+        val listener = settingsPrefsListener ?: return
+        getSharedPreferences(SettingsPrefs.PREFS_NAME, MODE_PRIVATE)
+            .unregisterOnSharedPreferenceChangeListener(listener)
+        settingsPrefsListener = null
     }
 
     private fun establish() {
@@ -128,7 +158,7 @@ class SafeViewVpnService : VpnService() {
 
     private fun isBlocked(domain: String): Boolean {
         val normalized = domain.trimEnd('.').lowercase()
-        val blocked = SettingsPrefs(this).blockedDomains
+        val blocked = blockedDomainsCache
         return blocked.any { normalized == it || normalized.endsWith(".$it") }
     }
 
@@ -208,6 +238,7 @@ class SafeViewVpnService : VpnService() {
         ((bytes[index].toInt() and 0xff) shl 8) or (bytes[index + 1].toInt() and 0xff)
 
     override fun onRevoke() {
+        unregisterBlockedDomainsListener()
         getSharedPreferences(STATUS_PREFS, MODE_PRIVATE).edit()
             .putBoolean(KEY_ACTIVE, false)
             .putString(KEY_ERROR, "VPN permission was revoked")
@@ -221,6 +252,7 @@ class SafeViewVpnService : VpnService() {
 
     override fun onDestroy() {
         running = false
+        unregisterBlockedDomainsListener()
         getSharedPreferences(STATUS_PREFS, MODE_PRIVATE).edit()
             .putBoolean(KEY_ACTIVE, false)
             .apply()

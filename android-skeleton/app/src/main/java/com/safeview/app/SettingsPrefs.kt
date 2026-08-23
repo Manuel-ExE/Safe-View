@@ -65,6 +65,13 @@ class SettingsPrefs(context: Context) {
         }
         set(v) = prefs.edit { putStringSet(KEY_BLOCKED_DOMAINS, v.map { it.lowercase().trim() }.filter { it.isNotEmpty() }.toSet()) }
 
+    var blockedSearchTerms: Set<String>
+        get() {
+            val stored = prefs.getStringSet(KEY_BLOCKED_TERMS, null)
+            return if (stored == null) DEFAULT_STRICT_TERMS else stored.toSet()
+        }
+        set(v) = prefs.edit { putStringSet(KEY_BLOCKED_TERMS, v.map { it.lowercase().trim() }.filter { it.isNotEmpty() }.toSet()) }
+
     /** Valid JSON injected into the page as window.SafeViewNativeSettings. */
     fun toJsObject(): String = JSONObject()
         .put("enabled", enabled)
@@ -79,7 +86,7 @@ class SettingsPrefs(context: Context) {
         .toString()
 
     companion object {
-        private const val PREFS_NAME = "safeview_settings"
+        const val PREFS_NAME = "safeview_settings"
         private const val KEY_ENABLED = "enabled"
         private const val KEY_STRICT = "strict"
         private const val KEY_REVEAL = "reveal"
@@ -90,12 +97,17 @@ class SettingsPrefs(context: Context) {
         private const val KEY_DISPLAY = "display_mode"
         private const val KEY_EXPLICIT = "explicit_threshold"
         private const val KEY_REVEALING = "revealing_threshold"
-        private const val KEY_BLOCKED_DOMAINS = "blocked_domains"
+        const val KEY_BLOCKED_DOMAINS = "blocked_domains"
+        const val KEY_BLOCKED_TERMS = "blocked_search_terms"
 
         val DEFAULT_BLOCKED_DOMAINS: Set<String> = setOf(
             "pornhub.com", "xvideos.com", "xnxx.com", "redtube.com", "youporn.com",
             "xhamster.com", "spankbang.com", "onlyfans.com", "brazzers.com", "chaturbate.com",
             "pornhd.com", "tube8.com", "beeg.com", "porn.com", "xvideos.es"
+        )
+
+        val DEFAULT_STRICT_TERMS: Set<String> = setOf(
+            "porn", "pornography", "xxx", "sex video", "nude", "naked", "onlyfans", "hentai"
         )
     }
 }

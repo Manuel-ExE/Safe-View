@@ -71,4 +71,13 @@
     <string name="home">Home</string>
     <string name="go">Go</string>
     <string name="url_hint">Search or enter URL</string>
+    <string name="blocked_terms_title">Blocked search terms</string>
+    <string name="blocked_terms_summary">Terms that SafeView blocks before a browser search loads.</string>
+    <string name="blocked_terms_save">Save blocked terms</string>
+    <string name="blocked_terms_reset">Reset to defaults</string>
+    <string name="blocked_terms_empty_title">Empty term list</string>
+    <string name="blocked_terms_empty_message">Saving an empty list disables explicit-term blocking in the SafeView browser. Continue?</string>
+    <string name="blocked_terms_save_empty">Disable term blocking</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 </resources>

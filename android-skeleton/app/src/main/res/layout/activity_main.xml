@@ -1,111 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/sv_bg">
+    android:layout_height="match_parent">
 
-    <!-- Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="4dp"
-        android:background="@color/sv_toolbar"
-        android:elevation="4dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/sv_bg">
 
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:src="@drawable/ic_arrow_back"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/back"
-            android:padding="10dp" />
+        <!-- Chrome-style toolbar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="6dp"
+            android:background="@color/sv_toolbar"
+            android:elevation="4dp">
 
-        <ImageButton
-            android:id="@+id/btnHome"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:src="@drawable/ic_home"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/home"
-            android:padding="10dp" />
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back"
+                android:padding="9dp" />
 
-        <EditText
-            android:id="@+id/urlBar"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:layout_marginHorizontal="4dp"
-            android:background="@drawable/url_bar_bg"
-            android:paddingHorizontal="14dp"
-            android:textColor="@color/sv_text"
-            android:textColorHint="@color/sv_muted"
-            android:hint="@string/url_hint"
-            android:inputType="textUri"
-            android:imeOptions="actionGo"
-            android:singleLine="true"
-            android:textSize="14sp" />
+            <ImageButton
+                android:id="@+id/btnHome"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_home"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/home"
+                android:padding="9dp" />
 
-        <ImageButton
-            android:id="@+id/btnGo"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:src="@drawable/ic_send"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/go"
-            android:padding="10dp" />
+            <!-- Pill-shaped omnibox, Chrome style -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/url_bar_bg"
+                android:paddingStart="10dp"
+                android:paddingEnd="6dp">
 
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_shield"
+                    android:contentDescription="@null" />
+
+                <EditText
+                    android:id="@+id/urlBar"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:background="@null"
+                    android:textColor="@color/sv_text"
+                    android:textColorHint="@color/sv_muted"
+                    android:hint="@string/url_hint"
+                    android:inputType="textUri"
+                    android:imeOptions="actionGo"
+                    android:singleLine="true"
+                    android:textSize="14sp" />
+
+                <ImageButton
+                    android:id="@+id/btnGo"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_send"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/go"
+                    android:padding="6dp" />
+            </LinearLayout>
+
+            <!-- Avatar-style button (opens Settings / protection center) -->
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginHorizontal="4dp"
+                android:src="@drawable/ic_settings"
+                android:background="@drawable/avatar_bg"
+                android:scaleType="centerInside"
+                android:padding="7dp"
+                android:contentDescription="@string/settings" />
+
+            <TextView
+                android:id="@+id/btnTabs"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="@color/sv_text"
+                android:textSize="13sp"
+                android:background="@drawable/tab_counter_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Open tabs" />
+
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="36dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_more_vert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Browser menu"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- Status chip -->
         <TextView
-            android:id="@+id/btnTabs"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:gravity="center"
-            android:text="1"
-            android:textColor="@color/sv_text"
-            android:textSize="14sp"
-            android:background="@drawable/tab_counter_bg"
-            android:clickable="true"
-            android:focusable="true"
-            android:contentDescription="Open tabs" />
+            android:id="@+id/statusChip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="6dp"
+            android:text="Protection on · Heuristics"
+            android:textColor="@color/sv_ok"
+            android:textSize="11sp"
+            android:background="#0D1A12" />
 
-        <ImageButton
-            android:id="@+id/btnMenu"
-            android:layout_width="40dp"
-            android:layout_height="44dp"
-            android:src="@android:drawable/ic_menu_more"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Browser menu"
-            android:padding="10dp" />
-
-        <ImageButton
-            android:id="@+id/btnSettings"
-            android:visibility="gone"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:src="@drawable/ic_settings"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/settings"
-            android:padding="10dp" />
+        <FrameLayout
+            android:id="@+id/webViewContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Status chip -->
-    <TextView
-        android:id="@+id/statusChip"
+    <!-- Chrome-style tab-grid overlay, hidden until btnTabs is tapped -->
+    <FrameLayout
+        android:id="@+id/tabsOverlayContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="6dp"
-        android:text="Protection on · Heuristics"
-        android:textColor="@color/sv_ok"
-        android:textSize="11sp"
-        android:background="#0D1A12" />
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-</LinearLayout>
+</FrameLayout>

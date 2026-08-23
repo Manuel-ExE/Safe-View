@@ -51,6 +51,11 @@
             android:label="@string/blocked_domains_title"
             android:parentActivityName=".SettingsActivity" />
         <activity
+            android:name=".BlockedTermsActivity"
+            android:exported="false"
+            android:label="@string/blocked_terms_title"
+            android:parentActivityName=".SettingsActivity" />
+        <activity
             android:name=".ProtectionHistoryActivity"
             android:exported="false"
             android:label="Protection history"
