@@ -12,5 +12,7 @@
     <color name="sv_input">#0D1728</color>
     <color name="sv_avatar_bg">#24334A</color>
     <color name="sv_pill_bg">#1A2940</color>
+    <color name="sv_card_new">#18243A</color>
+    <color name="sv_purple_accent">#7C5CFF</color>
     <color name="ic_launcher_background">#27549D</color>
 </resources>
